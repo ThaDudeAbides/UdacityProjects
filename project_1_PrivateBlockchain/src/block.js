@@ -26,7 +26,7 @@ class Block {
     /**
      *  validate() method will validate if the block has been tampered or not.
      *  Been tampered means that someone from outside the application tried to change
-     *  values in the block data as a consecuence the hash of the block should be different.
+     *  values in the block data as a consequence the hash of the block should be different.
      *  Steps:
      *  1. Return a new promise to allow the method be called asynchronous.
      *  2. Save the in auxiliary variable the current hash of the block (`this` represent the block object)
@@ -38,14 +38,15 @@ class Block {
     validate() {
         let self = this;
         return new Promise((resolve, reject) => {
-            // Save in auxiliary variable the current block hash
-            let block = this;                                
-            // Recalculate the hash of the Block
-            let newhash = SHA256(JSON.stringify(block)).toString();
-            // Comparing if the hashes changed
-            if(this.hash === newhash) {
+            let block = this;  // Save in auxiliary variable the current block hash
+            let currentHash = this.hash;
+            block.hash = null;
+            let newhash = SHA256(JSON.stringify(block)).toString();  // Recalculate the hash of the Block
+            if(currentHash === newhash) {  // Comparing if the hashes changed
+                this.hash = currentHash;
                 resolve(true);  // Returning the Block is valid
             } else {
+                this.hash = currentHash;
                 reject(false);  // Returning the Block is not valid
             }
         });
@@ -64,11 +65,14 @@ class Block {
         // Getting the encoded data saved in the Block
         // Decoding the data to retrieve the JSON representation of the object
         // Parse the data to an object to be retrieve.
+        let self = this;
+        
         let decodedData = JSON.parse(hex2ascii(this.body));
-        return decodedData;
-
-        // Resolve with the data if the object isn't the Genesis block
-
+        if(this.height > 0){
+            return decodedData;  // Resolve with the data if the object isn't the Genesis block
+        } else {
+            return false;
+        }
     }
 
 }

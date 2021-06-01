@@ -86,13 +86,13 @@ class BlockchainController {
                     if(block){
                         return res.status(200).json(block);
                     } else {
-                        return res.status(500).send("An error happened!");
+                        return res.status(500).send("Error: Block NOT Created!");
                     }
                 } catch (error) {
-                    return res.status(500).send(error);
+                    return res.status(500).send("Error: " + error.message);
                 }
             } else {
-                return res.status(500).send("Check the Body Parameter!");
+                return res.status(500).send("Error: Check the Body Parameters!");
             }
         });
     }
@@ -102,14 +102,16 @@ class BlockchainController {
         this.app.get("/block/hash/:hash", async (req, res) => {
             if(req.params.hash) {
                 const hash = req.params.hash;
-                let block = await this.blockchain.getBlockByHash(hash);
-                if(block){
+
+                try {
+                    let block = await this.blockchain.getBlockByHash(hash);
                     return res.status(200).json(block);
-                } else {
-                    return res.status(404).send("Block Not Found!");
+                } catch(error) {
+                    return res.status(404).send("Block not found: " + error);
                 }
+
             } else {
-                return res.status(404).send("Block Not Found! Review the Parameters!");
+                return res.status(404).send("Bad request! Review the input!");
             }
             
         });
