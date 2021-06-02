@@ -34,7 +34,7 @@ class Blockchain {
      * Passing as a data `{data: 'Genesis Block'}`
      */
     async initializeChain() {
-        if( this.height === -1){
+        if(this.height === -1){
             let block = new BlockClass.Block({data: 'Genesis Block'});
             await this._addBlock(block);
         }
@@ -73,10 +73,11 @@ class Blockchain {
             block.hash = SHA256(JSON.stringify(block)).toString();
             this.chain.push(block);
 
-            if(this.validateChain()) {
+            try {
+                await this.validateChain();
                 resolve(true);
-            } else {
-                reject(Error("Validation failed"))
+            } catch(error) {
+                resolve(Error("Validation failed"));
             }
         });
     }
@@ -150,7 +151,7 @@ class Blockchain {
         let self = this;
         return new Promise((resolve, reject) => {
            try {
-               let block = self.chain.filter(p => p.hash === hash)[0];
+               let block = self.chain.find(p => p.hash === hash);  // changed from 'filter' to 'find' per reviewer 2021-06-02
                if(block) {
                    resolve(block);
                } else {
@@ -170,7 +171,7 @@ class Blockchain {
     getBlockByHeight(height) {
         let self = this;
         return new Promise((resolve, reject) => {
-            let block = self.chain.filter(p => p.height === height)[0];
+            let block = self.chain.find(p => p.height === height);  // changed from 'filter' to 'find' per reviewer 2021-06-02
             if(block){
                 resolve(block);
             } else {
@@ -211,28 +212,27 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            let lastHash = null;
-            this.chain.forEach((element, index, array) => {
-                if(element.validate()) {
-                    // all good
-                    if (lastHash) {
-                        if (element.previousBlockHash === lastHash) {
-                            // all good
-                        } else {
+            let lastHash = null;  // temp cycling variable used to validate 'previous hash' value
+            this.chain.forEach(async (element, index, array) => {  // loop every block
+                let isItValid = await element.validate();
+                if(isItValid) {
+                    // element validated
+                    if (lastHash) {  // not genesis block - used for checking 'previous hash'
+                        if (element.previousBlockHash !== lastHash) {  // previous hash value doesn't match previous hash in chain
                             errorLog.push("Bad Previous Hash: " + index);
                         }
                     }
-                    lastHash = element.hash;
+                    lastHash = element.hash;  // buffer current hash for next iteration
                 } else {
-                    // bad
+                    // element did not validate - bad - push to error log
                     errorLog.push("Bad Block: " + index);
                 }
             });
 
             if (errorLog.length > 0) {
-                reject(Error("Bad blocks"));
+                reject(Error(JSON.stringify(errorLog)));  // some bad blocks!  Chain did not validate!
             } else {
-                resolve(true);
+                resolve(true);  // chain validated.  Return true to allow program to continue
             }
         });
     }

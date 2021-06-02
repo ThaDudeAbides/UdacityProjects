@@ -37,17 +37,17 @@ class Block {
      */
     validate() {
         let self = this;
-        return new Promise((resolve, reject) => {
-            let block = this;  // Save in auxiliary variable the current block hash
-            let currentHash = this.hash;
-            block.hash = null;
+        return new Promise(async (resolve, reject) => {
+            let block = this;  // Save the current block hash in auxiliary variable
+            let currentHash = this.hash;  //  Backup the hash variable to local veriable
+            this.hash = null;  //  set hash value to original value for proper hashing result
             let newhash = SHA256(JSON.stringify(block)).toString();  // Recalculate the hash of the Block
             if(currentHash === newhash) {  // Comparing if the hashes changed
-                this.hash = currentHash;
+                this.hash = currentHash;  // reassigning the original hash
                 resolve(true);  // Returning the Block is valid
-            } else {
-                this.hash = currentHash;
-                reject(false);  // Returning the Block is not valid
+            } else {  // hashes were NOT equal
+                this.hash = currentHash;  // returning the old hash, though unnecessary; block should be removed?
+                resolve(false);  // Returning the Block is not valid
             }
         });
     }
@@ -67,11 +67,11 @@ class Block {
         // Parse the data to an object to be retrieve.
         let self = this;
         
-        let decodedData = JSON.parse(hex2ascii(this.body));
-        if(this.height > 0){
+        let decodedData = JSON.parse(hex2ascii(this.body));  // decoding the 'body' from hex to ascii
+        if(this.height > 0){  // the Genesis block data is not returned
             return decodedData;  // Resolve with the data if the object isn't the Genesis block
         } else {
-            return false;
+            return "Decoded body not available!";  // should only occur in event Genesis block body is requested
         }
     }
 

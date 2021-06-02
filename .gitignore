@@ -119,6 +119,7 @@ dist
 
 # Added by MK for env handling
 env/
+project_1_PrivateBlockchain/workspace.code-workspace
 project_1_PrivateBlockchain/env/Scripts/activate.bat
 project_1_PrivateBlockchain/env/Scripts/Activate.ps1
 project_1_PrivateBlockchain/env/Scripts/deactivate.bat
