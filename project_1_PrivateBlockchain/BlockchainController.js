@@ -17,7 +17,8 @@ class BlockchainController {
         this.submitStar();
         this.getBlockByHash();
         this.getStarsByOwner();
-        this.getBlockBodyByHeight();
+        this.getDecodedBodyByHeight();
+        this.getValidateChain();
     }
 
     // Endpoint to Get a Block by Height (GET Endpoint)
@@ -38,14 +39,15 @@ class BlockchainController {
         });
     }
 
-    // Endpoint to Get a Block by Height (GET Endpoint)
-    getBlockBodyByHeight() {
-        this.app.get("/block/body/:height", async (req, res) => {
+    // Endpoint to Get a *DECODED* Block Body by Height (GET Endpoint)
+    // **NOTE:  added by MK (student) for debugging ; see 'getBlockByHeight()' above for original endpoint to get the ENCODED block body using the height.
+    getDecodedBodyByHeight() {
+        this.app.get("/body/:height", async (req, res) => {
             if(req.params.height) {
                 const height = parseInt(req.params.height);
-                let block = await this.blockchain.getBlockByHeight(height);
-                if(block){
-                    return res.status(200).json(block.getBData());
+                let block = await this.blockchain.getBlockByHeight(height);  // get the block for the specified height
+                if(block !== null){
+                    return res.status(200).json(block.getBData());  // return decoded block body
                 } else {
                     return res.status(404).send("Block Not Found!");
                 }
@@ -136,6 +138,21 @@ class BlockchainController {
                 return res.status(500).send("Block Not Found! Review the Parameters!");
             }
             
+        });
+    }
+
+    // This endpoint allows you to call the chain validation function
+    getValidateChain() {
+        this.app.get("/validate", async (req, res) => {
+            try {
+                if (this.blockchain.validateChain()) {
+                    return res.status(200).send("Chain is valid!");
+                } else {
+                    return res.status(404).send("Chain is NOT valid!");
+                }
+            } catch (error) {
+                return res.status(500).send("Chain is NOT valid: " + error.message);
+            }            
         });
     }
 
