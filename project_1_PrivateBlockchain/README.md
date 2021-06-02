@@ -1,3 +1,13 @@
+# Third Submittal
+
+I call this an ID10T error - as in, I'm the idiot.  I committed changes in VSCode but did not push the committed changes to main with git. 
+
+I'm still getting familiar with VSCode's intetgration with github.  Other IDE's I have used with github automatically push to main on commit. 
+
+I'm sure there's a setting somewhere.
+
+Github has been updated with the code changes.  I apologize for the needless go-around.  
+
 # Second submittal
 
 Feedback good.  Made all adjustments per feedback.  
